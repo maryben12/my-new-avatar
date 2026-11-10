@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Live Avatar Studio</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  background: #101322;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 25px 12px;
+  margin: 0;
+}
+
+h1 { color: #a78bfa; }
+
+.container {
+  max-width: 850px;
+  margin: 25px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+.panel {
+  background: #20263a;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.preview {
+  height: 280px;
+  background: #080b14;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#avatar {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  display: none;
+  transition: transform .1s linear;
+}
+
+video {
+  width: 100%;
+  max-height: 280px;
+  border-radius: 10px;
+  background: black;
+}
+
+button {
+  background: #8b5cf6;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  margin: 8px;
+  cursor: pointer;
+}
+
+input { margin: 15px 0; max-width: 100%; }
+
+#status { color: #c4b5fd; }
+</style>
+</head>
+
+<body>
+
+<h1>✨ My Live Avatar Studio</h1>
+<p>Upload your portrait and activate your camera.</p>
+
+<div class="container">
+
+<div class="panel">
+<h2>Your Avatar</h2>
+<div class="preview">
+<img id="avatar" alt="Your uploaded portrait">
+<span id="placeholder">Your photo appears here</span>
+</div>
+<input type="file" id="photo" accept="image/*">
+</div>
+
+<div class="panel">
+<h2>Your Live Camera</h2>
+<video id="camera" autoplay playsinline muted></video>
+<br>
+<button id="start">Start Camera</button>
+<button id="stop">Stop Camera</button>
+</div>
+
+</div>
+
+<p id="status">Welcome! Upload a photo to begin.</p>
+
+<script>
+const avatar = document.getElementById("avatar");
+const camera = document.getElementById("camera");
+const status = document.getElementById("status");
+
+let stream = null;
+
+document.getElementById("photo").onchange = function(e) {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  avatar.src = URL.createObjectURL(file);
+  avatar.style.display = "block";
+
+  document.getElementById("placeholder").style.display = "none";
+
+  status.textContent = "Photo uploaded successfully!";
+};
+
+document.getElementById("start").onclick = async function() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 320, height: 240 },
+      audio: false
+    });
+
+    camera.srcObject = stream;
+    status.textContent = "Camera is running!";
+  } catch(error) {
+    status.textContent = "Camera error: " + error.message;
+  }
+};
+
+document.getElementById("stop").onclick = function() {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+
+  camera.srcObject = null;
+  status.textContent = "Camera stopped.";
+};
+</script>
+
+</body>
+</html>
